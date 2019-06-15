@@ -53,5 +53,8 @@ class SZ(object):
 
 if __name__ == "__main__":
     sz = SZ()
-    sz.setCondition(0, '200553')
-    print(sz.getPicData())
+    sz.setCondition(1, '200553')
+    df = sz.getPicData()
+    df['时间'] = pd.to_datetime(df['时间'])
+    df = df[df['时间'] > pd.to_datetime('20180904')]
+    print(df)
