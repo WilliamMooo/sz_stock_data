@@ -56,22 +56,22 @@ class SZ(object):
         if self.lineType == 0:
             # 分时数据
             url = self.server + self.timeData + self.code
-            label = ["时间","最新","均价","涨跌","涨幅/%","成交量/手","成交额/万元"]
+            label = ["时间","最新","均价","涨跌","涨幅/%","成交量","成交额/万元"]
             # df.to_csv("分时数据.csv", index=False, encoding="gbk")
         elif self.lineType == 1:
             # 日线数据
             url = self.server + self.dayLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量/手","成交额/万元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量","成交额/万元"]
             # df.to_csv("日线数据.csv", index=False, encoding="gbk")
         elif self.lineType == 2:
             # 周线数据
             url = self.server + self.weekLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量/手","成交额/万元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量","成交额/万元"]
             # df.to_csv("周线数据.csv", index=False, encoding="gbk")
         elif self.lineType == 3:
             # 月线数据
             url = self.server + self.monthLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量/手","成交额/万元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量","成交额/万元"]
             # df.to_csv("月线数据.csv", index=False, encoding="gbk")
         else:
             print("参数不正确")
@@ -99,26 +99,25 @@ class SZ(object):
         self.lineType = lineType
         if lineType == 0:
             url = self.server + self.timeData + self.code
-            label = ["时间","指数","涨跌","涨幅","成交量/手","成交额/元"]
+            label = ["时间","指数","涨跌","涨幅","成交量","成交额"]
         elif lineType == 1:
             url = self.server + self.dayLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量/手","成交额/元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量","成交额"]
         elif lineType == 2:
             url = self.server + self.weekLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量/手","成交额/元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量","成交额"]
         elif lineType == 3:
             url = self.server + self.monthLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量/手","成交额/元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量","成交额"]
         else:
             print("参数错误")
         req = requests.get(url=url)
         originData = req.json()
         data = originData["data"]["picupdata"]
         df = pd.DataFrame(data, columns=label)
-        # df = pd.DataFrame(data)
         return df
 
-
+# 以下为一些使用实例
 if __name__ == "__main__":
     sz = SZ() # 初始化对象实例
     sz.setCondition(1, "000001") # 设置个股单只股票查询
@@ -130,9 +129,13 @@ if __name__ == "__main__":
     # 时间筛选
     df["时间"] = pd.to_datetime(df["时间"])
     df = df[df["时间"] > pd.to_datetime("20180904")]
-    # 简单画图
-    df["MA5"].plot()
-    df["MA10"].plot()
-    df["MA20"].plot()
+    # 简单画图K线图
+    KlineData = pd.DataFrame()
+    KlineData["MA5"] = df["MA5"]
+    KlineData["MA10"] = df["MA10"]
+    KlineData["MA20"] = df["MA20"]
+    KlineData["时间"] = df["时间"]
+    KlineData.set_index(["时间"], inplace=True)
+    KlineData.plot()
     plt.show()
     print(df) # 在控制台中打印
