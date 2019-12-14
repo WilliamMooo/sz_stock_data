@@ -6,86 +6,108 @@ from sklearn import linear_model
 from sklearn import ensemble
 from sklearn import neighbors
 
-def try_different_method(model, train_data, train_target, predict_data):
-    model.fit(train_data,train_target)
-    predict_price = model.predict(predict_data)
-    return predict_price
+class Predicter(object):
+    def __init__(self):
+        self.origin_data = pd.DataFrame()
+        self.time = pd.DataFrame()
+        self.close_price = pd.DataFrame()
+        self.data = pd.DataFrame()
+        self.data_p = pd.DataFrame()
+        self.to_predict_data = pd.DataFrame()
 
-def pca_process(origin_data, proportion):
-    if proportion > 1:
-        return []
-    pca = PCA()
-    data = scale(origin_data) # 数据标准化
-    data_p = pca.fit(data).transform(data) #pca
-    data_r = pd.DataFrame()
-    weight = 0
-    i = 0
-    while weight < proportion:
-        weight += pca.explained_variance_ratio_[i]
-        data_r[i] = data_p[:,i]
-        i += 1
-    return data_r
+    def read_data(self, origin):
+        self.origin_data = origin
+        # 时间线处理,去掉第一天，
+        self.time = pd.to_datetime(self.origin_data['时间'])
+        self.time.drop(index=0, inplace=True)
+        self.time.loc[len(self.time)+1] = self.time.loc[len(self.time)]+pd.Timedelta(days=1)
+        # 去掉第一天的收盘价
+        self.close_price = self.origin_data['收盘']
+        self.close_price.drop(index=0, inplace=True)
+        # 筛选数据指标
+        self.data = self.origin_data[['开盘','收盘','最低','最高','涨跌','涨幅','成交量','成交额/万元']]
+        # 主成分分析
+        self.data_p = self.pca_process(self.data, 0.95)
+        self.to_predict_data = pd.DataFrame(self.data_p)
+        self.data_p.drop(index=len(self.data_p)-1, inplace=True)
 
-def draw_pic(time, predict_data, real_data):
-    # 输出实际值和预测值
-    pic_data = pd.DataFrame()
-    pic_data['time'] = time
-    pic_data['real'] = real_data
-    pic_data['predict'] = predict_data
-    pic_data.set_index(['time'], inplace=True)
-    pic_data.plot()
-    plt.show()
+    def try_different_method(self, model, train_data, train_target, predict_data):
+        model.fit(train_data,train_target)
+        predict_price = model.predict(predict_data)
+        return predict_price
 
-def draw_epsilon(time, predict_data, real_data):
-    pic_data = pd.DataFrame()
-    time.drop(index=len(time), inplace=True)
-    pic_data['time'] = time
-    predict_data = pd.Series(predict_data)
-    predict_data.drop(index=len(predict_data)-1, inplace=True)
-    epsilon = real_data-predict_data
-    epsilon.drop(index=len(epsilon)-1, inplace=True)
-    epsilon.drop(index=0, inplace=True)
-    pic_data['epsilon'] = epsilon
-    pic_data.set_index(['time'], inplace=True)
-    pic_data.plot()
-    plt.show()
+    def pca_process(self, origin_data, proportion):
+        if proportion > 1:
+            return []
+        pca = PCA()
+        data = scale(origin_data) # 数据标准化
+        data_p = pca.fit(data).transform(data) #pca
+        data_r = pd.DataFrame()
+        weight = 0
+        i = 0
+        while weight < proportion:
+            weight += pca.explained_variance_ratio_[i]
+            data_r[i] = data_p[:,i]
+            i += 1
+        return data_r
+
+    def draw_pic(self, time, predict_data, real_data):
+        # 输出实际值和预测值
+        pic_data = pd.DataFrame()
+        pic_data['time'] = time
+        pic_data['real'] = real_data
+        pic_data['predict'] = predict_data
+        pic_data.set_index(['time'], inplace=True)
+        pic_data.plot()
+        plt.show()
+
+    def draw_epsilon(self, time, predict_data, real_data):
+        pic_data = pd.DataFrame()
+        time.drop(index=len(time), inplace=True)
+        pic_data['time'] = time
+        predict_data = pd.Series(predict_data)
+        predict_data.drop(index=len(predict_data)-1, inplace=True)
+        epsilon = real_data-predict_data
+        epsilon.drop(index=len(epsilon)-1, inplace=True)
+        epsilon.drop(index=0, inplace=True)
+        pic_data['epsilon'] = epsilon
+        pic_data.set_index(['time'], inplace=True)
+        pic_data.plot()
+        plt.show()
+
+    def Linear_regression(self):
+        model = linear_model.LinearRegression()
+        predict_data = self.try_different_method(model, self.data_p, self.close_price, self.to_predict_data)
+        self.draw_pic(self.time, predict_data, self.close_price)
+        self.draw_epsilon(self.time, predict_data, self.close_price)
+
+    def adaboost(self):
+        model = ensemble.AdaBoostRegressor(n_estimators=50) #这里使用50个决策树
+        predict_data = self.try_different_method(model, self.data_p, self.close_price, self.to_predict_data)
+        self.draw_pic(self.time, predict_data, self.close_price)
+        self.draw_epsilon(self.time, predict_data, self.close_price)
+
+    def knn(self):
+        model = neighbors.KNeighborsRegressor()
+        predict_data = self.try_different_method(model, self.data_p, self.close_price, self.to_predict_data)
+        self.draw_pic(self.time, predict_data, self.close_price)
+        self.draw_epsilon(self.time, predict_data, self.close_price)
 
 
 if __name__ == "__main__":
+    # 从文件读取原始数据
     origin_data = pd.read_csv("日线数据.csv", encoding="gbk")
 
-    # 时间线处理,去掉第一天，
-    time = pd.to_datetime(origin_data['时间'])
-    time.drop(index=0, inplace=True)
-    time.loc[len(time)+1] = time.loc[len(time)]+pd.Timedelta(days=1)
+    p = Predicter()
 
-    # 去掉第一天的收盘价
-    close_price = origin_data['收盘']
-    close_price.drop(index=0, inplace=True)
-
-    # 筛选数据指标
-    data = origin_data[['开盘','收盘','最低','最高','涨跌','涨幅','成交量','成交额/万元']]
-
-    # 主成分分析
-    data_p = pca_process(data, 0.95)
-    to_predict_data = pd.DataFrame(data_p)
-    data_p.drop(index=len(data_p)-1, inplace=True)
+    # 传入数据
+    p.read_data(origin_data)
 
     # 线性回归
-    # model = linear_model.LinearRegression()
-    # predict_data = try_different_method(model, data_p, close_price, to_predict_data)
-    # draw_pic(time, predict_data, close_price)
-    # draw_epsilon(time, predict_data, close_price)
+    p.Linear_regression()
 
     # adaboost
-    # model = ensemble.AdaBoostRegressor(n_estimators=50) #这里使用50个决策树
-    # predict_data = try_different_method(model, data_p, close_price, to_predict_data)
-    # draw_pic(time, predict_data, close_price)
-    # draw_epsilon(time, predict_data, close_price)
+    p.adaboost()
 
     # knn
-    model = neighbors.KNeighborsRegressor()
-    predict_data = try_different_method(model, data_p, close_price, to_predict_data)
-    draw_pic(time, predict_data, close_price)
-    draw_epsilon(time, predict_data, close_price)
-
+    p.knn()
