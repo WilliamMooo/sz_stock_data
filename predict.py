@@ -107,8 +107,8 @@ if __name__ == "__main__":
     # 线性回归
     p.Linear_regression()
 
-    # adaboost
-    p.adaboost()
+    # # adaboost
+    # p.adaboost()
 
-    # knn
-    p.knn()
+    # # knn
+    # p.knn()

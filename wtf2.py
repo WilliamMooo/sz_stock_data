@@ -139,7 +139,7 @@ class Predicter(object):
         self.time.drop(index=0, inplace=True)
         self.time.loc[len(self.time)+1] = self.time.loc[len(self.time)]+pd.Timedelta(days=1)
         # 去掉第一天的收盘价
-        self.close_price = self.origin_data['收盘']
+        self.close_price = self.origin_data['收盘'].astype('float')
         self.close_price.drop(index=0, inplace=True)
         # 筛选数据指标
         self.data = self.origin_data[['开盘','收盘','最低','最高','涨跌','涨幅','成交量','成交额/万元']]
@@ -171,11 +171,11 @@ class Predicter(object):
     def draw_pic(self, time, predict_data, real_data):
         # 输出实际值和预测值
         pic_data = pd.DataFrame()
-        pic_data['real'] = pd.Series(real_data)
-        pic_data['predict'] = pd.Series(predict_data)
-        pic_data['time'] = pd.Series(time)
+        pic_data['time'] = time
+        pic_data['real'] = real_data.astype('float')
+        pic_data['predict'] = predict_data
         pic_data.set_index(['time'], inplace=True)
-        print(pic_data)
+        pic_data.plot()
         plt.show()
 
     def draw_epsilon(self, time, predict_data, real_data):
@@ -243,7 +243,7 @@ def A():
             x_ticks.append(len(df)*i/6)
             y_ticks.append(float(min(y_data))/2*i)
         plt.xticks(x_ticks)
-        # plt.yticks(y_ticks)
+        plt.yticks(y_ticks)
         plt.plot(x_data, y_data)
         plt.show()
         print(df) # 在控制台中打印
@@ -321,7 +321,6 @@ def HQSJ(x):
         plt.show()
         print(df) # 在控制台中打印
 # def HQSJ0():
-#     if __name__ == "__main__":
 #         sz2 = SZ() # 初始化对象实例
 #         df = stock_num.get()
 #         mk=0
@@ -403,9 +402,9 @@ bn5 = tk.Button(root, text='线性预测', width=15, height=2, fg="white", bg='b
 bn5.place(x=350, y=20, anchor='nw')
 
 bn6 = tk.Button(root, text='adaboost预测', width=15, height=2, fg="white", bg='blue', font=("楷体", 7, "bold"),command=adyc)
-bn6.place(x=400, y=20, anchor='nw')
+bn6.place(x=450, y=20, anchor='nw')
 
 bn7 = tk.Button(root, text='knn预测', width=15, height=2, fg="white", bg='blue', font=("楷体", 7, "bold"),command=knnyc)
-bn7.place(x=450, y=20, anchor='nw')
+bn7.place(x=550, y=20, anchor='nw')
 
 root.mainloop()

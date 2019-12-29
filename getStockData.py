@@ -138,5 +138,4 @@ if __name__ == "__main__":
     KlineData.set_index(["时间"], inplace=True)
     KlineData.plot()
     plt.show()
-    df.to_csv("日线数据.csv", index=False, encoding="gbk")
-    print(df) # 在控制台中打印
+    print(KlineData) # 在控制台中打印
