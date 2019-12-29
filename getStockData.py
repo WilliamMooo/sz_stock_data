@@ -56,22 +56,22 @@ class SZ(object):
         if self.lineType == 0:
             # 分时数据
             url = self.server + self.timeData + self.code
-            label = ["时间","最新","均价","涨跌","涨幅/%","成交量","成交额/万元"]
+            label = ["时间","最新","均价","涨跌","涨幅","成交量","成交额/万元"]
             # df.to_csv("分时数据.csv", index=False, encoding="gbk")
         elif self.lineType == 1:
             # 日线数据
             url = self.server + self.dayLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量","成交额/万元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量","成交额/万元"]
             # df.to_csv("日线数据.csv", index=False, encoding="gbk")
         elif self.lineType == 2:
             # 周线数据
             url = self.server + self.weekLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量","成交额/万元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量","成交额/万元"]
             # df.to_csv("周线数据.csv", index=False, encoding="gbk")
         elif self.lineType == 3:
             # 月线数据
             url = self.server + self.monthLine + self.code
-            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅/%","成交量","成交额/万元"]
+            label = ["时间","开盘","收盘","最低","最高","涨跌","涨幅","成交量","成交额/万元"]
             # df.to_csv("月线数据.csv", index=False, encoding="gbk")
         else:
             print("参数不正确")
@@ -138,4 +138,5 @@ if __name__ == "__main__":
     KlineData.set_index(["时间"], inplace=True)
     KlineData.plot()
     plt.show()
+    df.to_csv("日线数据.csv", index=False, encoding="gbk")
     print(df) # 在控制台中打印

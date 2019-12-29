@@ -58,6 +58,7 @@ class Predicter(object):
         pic_data['real'] = real_data
         pic_data['predict'] = predict_data
         pic_data.set_index(['time'], inplace=True)
+        print(pic_data)
         pic_data.plot()
         plt.show()
 
