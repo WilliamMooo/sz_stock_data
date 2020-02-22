@@ -17,7 +17,7 @@ class SZ(object):
     # 初始化数据
     def __init__(self):
         self.lineType = 0 # 图线类型：0为分时线；1为日线；2为周线；3为月线
-        self.code = "000001" # 股票代码
+        self.code = "" # 股票代码
         self.random = str(random.uniform(0,1))
         self.server = "http://www.szse.cn/api/market/ssjjhq/"
         self.timeData = "getTimeData?random="+self.random+"&marketId=1&code="

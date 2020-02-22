@@ -17,7 +17,7 @@ class Predicter(object):
 
     def read_data(self, origin):
         self.origin_data = origin
-        # 时间线处理,去掉第一天，
+        # 时间线处理,去掉第一天
         self.time = pd.to_datetime(self.origin_data['时间'])
         self.time.drop(index=0, inplace=True)
         self.time.loc[len(self.time)+1] = self.time.loc[len(self.time)]+pd.Timedelta(days=1)
